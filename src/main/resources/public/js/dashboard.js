@@ -467,8 +467,7 @@ function getAccount() {
         document.getElementById("interest-account").innerText =
           response.investedAmount.toFixed(1);
         let startTime = moment(response.startDate);
-        // let currentTime = moment();
-        let currentTime = moment(moment()).add(96, "hours");
+        let currentTime = moment();
         let endTime = moment(response.endDate);
         let elapsedTime = currentTime.diff(startTime, "hours");
         let totalTime;

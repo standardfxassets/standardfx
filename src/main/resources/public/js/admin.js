@@ -114,11 +114,7 @@ function startTrade() {
 
 function getWithdrawalDetails(withdrawalId) {
   let withdrawalDetailsXhr = new XMLHttpRequest();
-  withdrawalDetailsXhr.open(
-    "GET",
-    `/withdrawal/${withdrawalId}`,
-    true
-  );
+  withdrawalDetailsXhr.open("GET", `/withdrawal/${withdrawalId}`, true);
   withdrawalDetailsXhr.send();
 
   withdrawalDetailsXhr.onreadystatechange = function () {
@@ -167,8 +163,7 @@ function getWithdrawalDetails(withdrawalId) {
                 ).textContent = (0).toFixed(1);
               } else {
                 let startTime = moment(response.startDate);
-                // let currentTime = moment();
-                let currentTime = moment(moment()).add(72, "hours");
+                let currentTime = moment();
                 let endTime = moment(response.endDate);
                 let elapsedTime = currentTime.diff(startTime, "hours");
                 let totalTime;
@@ -248,11 +243,7 @@ function getWithdrawals2(userEmail) {
   let allWithdrawals = 0;
   let successfulWithdrawals = 0;
   let withdrawalXhr = new XMLHttpRequest();
-  withdrawalXhr.open(
-    "GET",
-    `/user/${userEmail}/withdrawal`,
-    true
-  );
+  withdrawalXhr.open("GET", `/user/${userEmail}/withdrawal`, true);
   withdrawalXhr.send();
 
   withdrawalXhr.onreadystatechange = function () {
@@ -361,8 +352,7 @@ function getUserDetails() {
               document.getElementById("interest-account").innerText =
                 response.investedAmount.toFixed(1);
               let startTime = moment(response.startDate);
-              // let currentTime = moment();
-              let currentTime = moment(moment()).add(72, "hours");
+              let currentTime = moment();
               let endTime = moment(response.endDate);
               let elapsedTime = currentTime.diff(startTime, "hours");
               let totalTime;
@@ -524,7 +514,7 @@ function modifyWithdrawal(status) {
   withdrawalXhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       let response = JSON.parse(this.response);
-      console.log(response);
+      location.reload();
     }
   };
 }
@@ -533,6 +523,10 @@ function getSuccessfulWithdrawals() {
   let withdrawalXhr = new XMLHttpRequest();
   withdrawalXhr.open("GET", `/withdrawals/successful`, true);
   withdrawalXhr.send();
+  document.getElementById(
+    "distinct-message-root"
+  ).innerHTML = `<div id="distinct-message-spinner" class="fa fa-spinner fa-spin x-large blue-text opacity-1"
+							style="position: absolute; left: 45%; top: 30%;"></div>`;
 
   withdrawalXhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -556,6 +550,11 @@ function getDeclinedWithdrawals() {
   let withdrawalXhr = new XMLHttpRequest();
   withdrawalXhr.open("GET", `/withdrawals/declined`, true);
   withdrawalXhr.send();
+  document.getElementById(
+    "distinct-message-root"
+  ).innerHTML = `<div id="distinct-message-spinner" class="fa fa-spinner fa-spin x-large blue-text opacity-1"
+							style="position: absolute; left: 45%; top: 30%;"></div>`;
+
 
   withdrawalXhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -881,7 +880,7 @@ function bindWithdrawalInfo(info) {
               class="no-margin-2 big blue-text-dash"
               style="font-weight: 600"
             >
-              ${withdraw}:
+              ${withdraw}
             </p>
             <p class="no-margin-2 big blue-text-dash" style="font-weight: 600;">
               $<span id="withdrawal-amount" style="font-weight: 600;"></span>
