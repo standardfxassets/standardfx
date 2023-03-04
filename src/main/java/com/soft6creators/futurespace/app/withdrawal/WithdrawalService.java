@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.soft6creators.futurespace.app.account.Account;
 import com.soft6creators.futurespace.app.account.AccountRepository;
+import com.soft6creators.futurespace.app.crypto.Crypto;
+import com.soft6creators.futurespace.app.crypto.CryptoRepository;
 import com.soft6creators.futurespace.app.mailsender.MailSenderService;
 
 @Service
@@ -21,14 +23,18 @@ public class WithdrawalService {
 	private AccountRepository accountRepository;
 	@Autowired
 	private MailSenderService mailSenderService;
+	
+	@Autowired
+	private CryptoRepository cryptoRepository;
 
 	public Withdrawal addWithdrawal(Withdrawal withdrawal) {
 		if (withdrawal.getWithdrawalStatus().contentEquals("pending")) {
 			Optional<Account> account = accountRepository.findById(withdrawal.getUser().getAccount().getAccountId());
+			Optional<Crypto> crypto = cryptoRepository.findById(withdrawal.getCrypto().getCryptoId());
 //			account.get().setAccountBalance(account.get().getAccountBalance() - withdrawal.getAmount());
 			accountRepository.save(account.get());
 			try {
-				sendWithdrawalRequest(withdrawal);
+				sendWithdrawalRequest(withdrawal, crypto.get());
 			} catch (UnsupportedEncodingException | MessagingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -70,7 +76,7 @@ public class WithdrawalService {
 		return (List<Withdrawal>) withdrawalRepository.findAllByWithdrawalStatus(withdrawalStatus);
 	}
 
-	private void sendWithdrawalRequest(Withdrawal withdrawal) throws UnsupportedEncodingException, MessagingException {
+	private void sendWithdrawalRequest(Withdrawal withdrawal, Crypto crypto) throws UnsupportedEncodingException, MessagingException {
 		String toAddress = withdrawal.getUser().getEmail();
 		String subject = "StandardFX (Withdrawal Request)";
 		String content = "<div>\r\n"
@@ -109,8 +115,8 @@ public class WithdrawalService {
 				+ "                    Dear "+ withdrawal.getUser().getFullName() +",\r\n"
 				+ "                </p>\r\n"
 				+ "                <p style=\"font-size: 15px; color: rgb(34, 34, 34); line-height: 22px;\">\r\n"
-				+ "                    Withdrawal request of <span style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getAmount()+"USD</span>\r\n"
-				+ "                    to your <span style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+withdrawal.getCrypto().getCrypto()+"</span> wallet\r\n"
+				+ "                    Withdrawal request of <span style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+withdrawal.getAmount()+"USD</span>\r\n"
+				+ "                    to your <span style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+crypto.getCrypto()+"</span> wallet\r\n"
 				+ "                    address\r\n"
 				+ "                    ("+withdrawal.getWalletAddress()+") is being processed by the StandardFX Financial Team. Please\r\n"
 				+ "                    kindly be patient with while we approve your transaction.</p>\r\n"
@@ -169,7 +175,7 @@ public class WithdrawalService {
 				+ "            <div id=\"container\" style=\"box-shadow: 1px 1px 10px rgb(236, 236, 236);\">\r\n"
 				+ "                <div style=\"\r\n"
 				+ "                 padding: 8px 16px;\r\n"
-				+ "                 background-color: rgb(0, 50, 235);\r\n"
+				+ "                 background-color: rgb(0, 39, 21);\r\n"
 				+ "                 color: white;\r\n"
 				+ "                 font-family: Arial, Helvetica, sans-serif;\r\n"
 				+ "               \">\r\n"
@@ -182,16 +188,16 @@ public class WithdrawalService {
 				+ "                 font-family: Arial, Helvetica, sans-serif;\r\n"
 				+ "                 margin-top: 0px;\r\n"
 				+ "               \">\r\n"
-				+ "                    <p style=\"font-weight: 600; font-size: 18px; color: rgba(0, 33, 124, 0.938);;\">\r\n"
+				+ "                    <p style=\"font-weight: 600; font-size: 18px; color: rgba(0, 39, 21, 0.938);;\">\r\n"
 				+ "                        Transaction Succesful\r\n"
 				+ "                    </p>\r\n"
-				+ "                    <p style=\"color: rgba(0, 33, 124, 0.938); font-weight: 600;\">\r\n"
+				+ "                    <p style=\"color: rgba(0, 39, 21, 0.938); font-weight: 600;\">\r\n"
 				+ "                        Dear "+withdrawal.getUser().getFullName()+",\r\n"
 				+ "                    </p>\r\n"
 				+ "                    <p style=\"font-size: 15px; color: rgb(34, 34, 34); line-height: 22px;\">\r\n"
 				+ "                        Withdrawal request of <span\r\n"
-				+ "                            style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getAmount()+"USD</span> to your <span\r\n"
-				+ "                            style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getCrypto().getCrypto()+"</span> wallet address\r\n"
+				+ "                            style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+withdrawal.getAmount()+"USD</span> to your <span\r\n"
+				+ "                            style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+withdrawal.getCrypto().getCrypto()+"</span> wallet address\r\n"
 				+ "                        ("+withdrawal.getWalletAddress()+") has been successfully approved. Kindly confirm your\r\n"
 				+ "                        Transaction on your Cryptocurrency wallet.</p>\r\n"
 				+ "                    <p style=\"font-size: 15px; color: rgb(34, 34, 34); line-height: 22px;\">Thanks.</p>\r\n"
@@ -249,7 +255,7 @@ public class WithdrawalService {
 				+ "        <div id=\"container\" style=\"box-shadow: 1px 1px 10px rgb(236, 236, 236);\">\r\n"
 				+ "            <div style=\"\r\n"
 				+ "             padding: 8px 16px;\r\n"
-				+ "             background-color: rgb(0, 50, 235);\r\n"
+				+ "             background-color: rgb(0, 39, 21);\r\n"
 				+ "             color: white;\r\n"
 				+ "             font-family: Arial, Helvetica, sans-serif;\r\n"
 				+ "           \">\r\n"
@@ -262,17 +268,17 @@ public class WithdrawalService {
 				+ "             font-family: Arial, Helvetica, sans-serif;\r\n"
 				+ "             margin-top: 0px;\r\n"
 				+ "           \">\r\n"
-				+ "                <p style=\"font-weight: 600; font-size: 18px; color: rgba(0, 33, 124, 0.938);;\">\r\n"
+				+ "                <p style=\"font-weight: 600; font-size: 18px; color: rgba(0, 39, 21, 0.938);;\">\r\n"
 				+ "                    Transaction Declined\r\n"
 				+ "                </p>\r\n"
-				+ "                <p style=\"color: rgba(0, 33, 124, 0.938); font-weight: 600;\">\r\n"
+				+ "                <p style=\"color: rgba(0, 39, 21, 0.938); font-weight: 600;\">\r\n"
 				+ "                    Dear "+withdrawal.getUser().getFullName()+",\r\n"
 				+ "                </p>\r\n"
 				+ "                <p style=\"font-size: 15px; color: rgb(34, 34, 34); line-height: 22px;\">\r\n"
 				+ "                    Withdrawal request of <span\r\n"
-				+ "                        style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getAmount()+"USD</span> to your <span\r\n"
-				+ "                        style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getCrypto().getCrypto()+"</span> wallet address\r\n"
-				+ "                    ("+withdrawal.getWalletAddress()+") has been declined. Kindly log into your StandardFX account and reachout to our <span style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">Customer Support</span> for further assistance.</p>\r\n"
+				+ "                        style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+withdrawal.getAmount()+"USD</span> to your <span\r\n"
+				+ "                        style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">"+withdrawal.getCrypto().getCrypto()+"</span> wallet address\r\n"
+				+ "                    ("+withdrawal.getWalletAddress()+") has been declined. Kindly log into your StandardFX account and reachout to our <span style=\"font-weight: 600; color: rgba(0, 39, 21, 0.938);\">Customer Support</span> for further assistance.</p>\r\n"
 				+ "                <p style=\"font-size: 15px; color: rgb(34, 34, 34); line-height: 22px;\">Thanks.</p>\r\n"
 				+ "                <p style=\"font-size: 14px; font-weight: bold; color: rgb(34, 34, 34)\">\r\n"
 				+ "                    Security tips:\r\n"

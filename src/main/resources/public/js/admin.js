@@ -114,7 +114,11 @@ function startTrade() {
 
 function getWithdrawalDetails(withdrawalId) {
   let withdrawalDetailsXhr = new XMLHttpRequest();
-  withdrawalDetailsXhr.open("GET", `/withdrawal/${withdrawalId}`, true);
+  withdrawalDetailsXhr.open(
+    "GET",
+    `/withdrawal/${withdrawalId}`,
+    true
+  );
   withdrawalDetailsXhr.send();
 
   withdrawalDetailsXhr.onreadystatechange = function () {
@@ -164,6 +168,7 @@ function getWithdrawalDetails(withdrawalId) {
               } else {
                 let startTime = moment(response.startDate);
                 let currentTime = moment();
+                // let currentTime = moment(moment()).add(2, "hours");
                 let endTime = moment(response.endDate);
                 let elapsedTime = currentTime.diff(startTime, "hours");
                 let totalTime;
@@ -206,11 +211,15 @@ function getWithdrawalDetails(withdrawalId) {
   };
 }
 
-function getWithdrawals() {
+function getWithdrawals(userEmail) {
   let allWithdrawals = 0;
   let successfulWithdrawals = 0;
   let withdrawalXhr = new XMLHttpRequest();
-  withdrawalXhr.open("GET", `/user/${toUser}/withdrawal`, true);
+  withdrawalXhr.open(
+    "GET",
+    `/user/${userEmail}/withdrawal`,
+    true
+  );
   withdrawalXhr.send();
 
   withdrawalXhr.onreadystatechange = function () {
@@ -243,7 +252,11 @@ function getWithdrawals2(userEmail) {
   let allWithdrawals = 0;
   let successfulWithdrawals = 0;
   let withdrawalXhr = new XMLHttpRequest();
-  withdrawalXhr.open("GET", `/user/${userEmail}/withdrawal`, true);
+  withdrawalXhr.open(
+    "GET",
+    `/user/${userEmail}/withdrawal`,
+    true
+  );
   withdrawalXhr.send();
 
   withdrawalXhr.onreadystatechange = function () {
@@ -257,7 +270,6 @@ function getWithdrawals2(userEmail) {
           }
         });
       }
-      console.log(accrued);
       document.getElementById("withdrawal-account-balance").innerText = (
         account.accountBalance +
         accrued -
@@ -307,8 +319,9 @@ function getUserDetails() {
       investmentXhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
           let response = JSON.parse(this.response);
+          console.log(response);
           if (response == null) {
-            document.getElementById("interest-account").innerText = (0).toFixed(
+            document.getElementById("account-balance").innerText = (0).toFixed(
               1
             );
             document.getElementById("accrued-interest").textContent =
@@ -317,76 +330,45 @@ function getUserDetails() {
               1
             );
           } else {
-            console.log(response.active);
             hasInvestment = response.active;
             document.getElementById("interest-account").innerText =
               response.investedAmount.toFixed(1);
             let startTime = moment(response.startDate);
             let currentTime = moment();
+            // let currentTime = moment(moment()).add(2, "hours");
             let endTime = moment(response.endDate);
             let elapsedTime = currentTime.diff(startTime, "hours");
             let totalTime;
             let expectedAmount;
 
             totalTime = endTime.diff(startTime, "hours");
+
             expectedAmount =
               (response.investedAmount * response.percentage) / 100;
 
-            if (endTime.diff(currentTime, "minutes") <= 0) {
-              document.getElementById(
-                "payment-percent"
-              ).style.width = `${100}%`;
-              document.getElementById("accrued-interest").textContent =
-                (0).toFixed(1);
-              document.getElementById("paid-interest").textContent =
-                account.accountBalance.toFixed(2);
-              document.getElementById("interest-account").innerText =
-                account.accountBalance.toFixed(1);
+            let currentPercent = totalTime / elapsedTime;
 
-              investmentComplete(
-                response,
-                expectedAmount + account.accountBalance
-              );
-            } else {
-              hasInvestment = response.active;
-              document.getElementById("interest-account").innerText =
-                response.investedAmount.toFixed(1);
-              let startTime = moment(response.startDate);
-              let currentTime = moment();
-              let endTime = moment(response.endDate);
-              let elapsedTime = currentTime.diff(startTime, "hours");
-              let totalTime;
-              let expectedAmount;
+            addedAmount = expectedAmount / currentPercent;
 
-              totalTime = endTime.diff(startTime, "hours");
+            console.log(addedAmount);
 
-              expectedAmount =
-                (response.investedAmount * response.percentage) / 100;
+            accrued = parseFloat(addedAmount.toFixed(1));
 
-              let currentPercent = totalTime / elapsedTime;
+            // console.log("Total", totalTime);
+            // console.log("Elapsed", elapsedTime);
+            // console.log("Current percent", currentPercent);
+            // console.log("Current Amount", response.investedAmount + addedAmount);
 
-              addedAmount = expectedAmount / currentPercent;
+            document.getElementById("accrued-interest").textContent =
+              addedAmount.toFixed(1);
+            document.getElementById("paid-interest").textContent = (0).toFixed(
+              1
+            );
 
-              console.log(addedAmount);
+            document.getElementById("payment-percent").style.width = `${100}%`;
 
-              accrued = parseFloat(addedAmount.toFixed(1));
-
-              // console.log("Total", totalTime);
-              // console.log("Elapsed", elapsedTime);
-              // console.log("Current percent", currentPercent);
-              // console.log("Current Amount", response.investedAmount + addedAmount);
-
-              document.getElementById("accrued-interest").textContent =
-                addedAmount.toFixed(1);
-              document.getElementById("paid-interest").textContent =
-                (0).toFixed(1);
-
-              document.getElementById(
-                "payment-percent"
-              ).style.width = `${100}%`;
-            }
+            getWithdrawals(toUser);
           }
-          getWithdrawals();
         }
       };
     }
@@ -554,7 +536,6 @@ function getDeclinedWithdrawals() {
     "distinct-message-root"
   ).innerHTML = `<div id="distinct-message-spinner" class="fa fa-spinner fa-spin x-large blue-text opacity-1"
 							style="position: absolute; left: 45%; top: 30%;"></div>`;
-
 
   withdrawalXhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -792,9 +773,9 @@ function bindUserInfo(info) {
 }
 
 function bindWithdrawalInfo(info) {
-  let withdraw = "Withdrawal Amount";
+  let withdraw = "Requested";
   if (info.withdrawalStatus == "successful") {
-    withdraw = "Approved Amount";
+    withdraw = "Approved";
   }
   return `
   <div>

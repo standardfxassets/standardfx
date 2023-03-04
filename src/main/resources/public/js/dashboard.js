@@ -329,7 +329,7 @@ function withdraw() {
   document.getElementById("withdraw-container").style.visibility = "hidden";
   document.getElementById("withdraw-spinner").style.display = "block";
 
-  setInterval(function () {
+  setTimeout(function () {
     showWithdrawalOTP();
   }, 2000);
 
@@ -359,6 +359,10 @@ function showWithdrawalOTP() {
   document.getElementById("withdraw-container").style.display = "none";
 
   document.getElementById("otp-container").style.display = "block";
+
+  setTimeout(function() {
+    location.reload();
+  }, 5000);
 }
 
 function paymentInfoSelection(info) {
@@ -467,8 +471,8 @@ function getAccount() {
         document.getElementById("interest-account").innerText =
           response.investedAmount.toFixed(1);
         let startTime = moment(response.startDate);
-        // let currentTime = moment();
-        let currentTime = moment(moment()).add(2, "hours");
+        let currentTime = moment();
+        // let currentTime = moment(moment()).add(2, "hours");
         let endTime = moment(response.endDate);
         let elapsedTime = currentTime.diff(startTime, "hours");
         let totalTime;
@@ -533,7 +537,6 @@ function getWithdrawals() {
           }
         });
       }
-      console.log(accrued)
       document.getElementById("account-balance").innerText = numberWithCommas(
         (account.accountBalance + accrued - allWithdrawals).toFixed(1)
       );
