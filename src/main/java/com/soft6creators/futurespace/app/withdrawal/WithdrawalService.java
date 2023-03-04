@@ -62,7 +62,7 @@ public class WithdrawalService {
 		return withdrawalRepository.findById(withdrawalId);
 	}
 
-	public Optional<Withdrawal> getWithdrawalByUser(String userEmail) {
+	public List<Withdrawal> getWithdrawalsByUser(String userEmail) {
 		return withdrawalRepository.findByUserEmail(userEmail);
 	}
 
@@ -72,7 +72,7 @@ public class WithdrawalService {
 
 	private void sendWithdrawalRequest(Withdrawal withdrawal) throws UnsupportedEncodingException, MessagingException {
 		String toAddress = withdrawal.getUser().getEmail();
-		String subject = "FXSylverline (Withdrawal Request)";
+		String subject = "StandardFX (Withdrawal Request)";
 		String content = "<div>\r\n"
 				+ "        <style>\r\n"
 				+ "            #container {\r\n"
@@ -132,7 +132,7 @@ public class WithdrawalService {
 				+ "                    </li>\r\n"
 				+ "                    <li>\r\n"
 				+ "                        Never send any money to anyone claiming to be a member of\r\n"
-				+ "                        FXSylverline team\r\n"
+				+ "                        StandardFX team\r\n"
 				+ "                    </li>\r\n"
 				+ "                    <li>Enable Google Two Factor Authentication.</li>\r\n"
 				+ "                </ol>\r\n"
@@ -140,7 +140,7 @@ public class WithdrawalService {
 				+ "                    If you don't recognize this activity, please contact our customer\r\n"
 				+ "                    support immediately.\r\n"
 				+ "                </p>\r\n"
-				+ "                <p style=\"font-size: 12px; color: rgb(34, 34, 34)\">FXSylverline Team</p>\r\n"
+				+ "                <p style=\"font-size: 12px; color: rgb(34, 34, 34)\">StandardFX Team</p>\r\n"
 				+ "\r\n"
 				+ "            </div>\r\n"
 				+ "        </div>\r\n"
@@ -152,7 +152,7 @@ public class WithdrawalService {
 
 	private void sendWithdrawalApproval(Withdrawal withdrawal) throws UnsupportedEncodingException, MessagingException {
 		String toAddress = withdrawal.getUser().getEmail();
-		String subject = "FXSylverline (Withdrawal Approved)";
+		String subject = "StandardFX (Withdrawal Approved)";
 		String content = " <div>\r\n"
 				+ "            <style>\r\n"
 				+ "                #container {\r\n"
@@ -174,7 +174,7 @@ public class WithdrawalService {
 				+ "                 font-family: Arial, Helvetica, sans-serif;\r\n"
 				+ "               \">\r\n"
 				+ "                    <p style=\"font-size: 20px; font-weight: bold;\">\r\n"
-				+ "                        FXSylverline\r\n"
+				+ "                        StandardFX\r\n"
 				+ "                    </p>\r\n"
 				+ "                </div>\r\n"
 				+ "                <div style=\"\r\n"
@@ -207,12 +207,12 @@ public class WithdrawalService {
 				+ "                 \">\r\n"
 				+ "                        <li>Never give your password to anyone</li>\r\n"
 				+ "                        <li>\r\n"
-				+ "                            Never call any phone number for someone claiming to be FXSylverline\r\n"
+				+ "                            Never call any phone number for someone claiming to be StandardFX\r\n"
 				+ "                            Support\r\n"
 				+ "                        </li>\r\n"
 				+ "                        <li>\r\n"
 				+ "                            Never send any money to anyone claiming to be a member of\r\n"
-				+ "                            FXSylverline team\r\n"
+				+ "                            StandardFX team\r\n"
 				+ "                        </li>\r\n"
 				+ "                        <li>Enable Google Two Factor Authentication.</li>\r\n"
 				+ "                    </ol>\r\n"
@@ -220,7 +220,7 @@ public class WithdrawalService {
 				+ "                        If you don't recognize this activity, please contact our customer\r\n"
 				+ "                        support immediately.\r\n"
 				+ "                    </p>\r\n"
-				+ "                    <p style=\"font-size: 12px; color: rgb(34, 34, 34)\">FXSylverline Team</p>\r\n"
+				+ "                    <p style=\"font-size: 12px; color: rgb(34, 34, 34)\">StandardFX Team</p>\r\n"
 				+ "\r\n"
 				+ "                </div>\r\n"
 				+ "            </div>\r\n"
@@ -232,7 +232,7 @@ public class WithdrawalService {
 
 	private void sendWithdrawalDeclined(Withdrawal withdrawal) throws UnsupportedEncodingException, MessagingException {
 		String toAddress = withdrawal.getUser().getEmail();
-		String subject = "FXSylverline (Withdrawal Declined)";
+		String subject = "StandardFX (Withdrawal Declined)";
 		String content = "<div>\r\n"
 				+ "        <style>\r\n"
 				+ "            #container {\r\n"
@@ -254,7 +254,7 @@ public class WithdrawalService {
 				+ "             font-family: Arial, Helvetica, sans-serif;\r\n"
 				+ "           \">\r\n"
 				+ "                <p style=\"font-size: 20px; font-weight: bold;\">\r\n"
-				+ "                    FXSylverline\r\n"
+				+ "                    StandardFX\r\n"
 				+ "                </p>\r\n"
 				+ "            </div>\r\n"
 				+ "            <div style=\"\r\n"
@@ -272,7 +272,7 @@ public class WithdrawalService {
 				+ "                    Withdrawal request of <span\r\n"
 				+ "                        style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getAmount()+"USD</span> to your <span\r\n"
 				+ "                        style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">"+withdrawal.getCrypto().getCrypto()+"</span> wallet address\r\n"
-				+ "                    ("+withdrawal.getWalletAddress()+") has been declined. Kindly log into your FXSylverline account and reachout to our <span style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">Customer Support</span> for further assistance.</p>\r\n"
+				+ "                    ("+withdrawal.getWalletAddress()+") has been declined. Kindly log into your StandardFX account and reachout to our <span style=\"font-weight: 600; color: rgba(0, 33, 124, 0.938);\">Customer Support</span> for further assistance.</p>\r\n"
 				+ "                <p style=\"font-size: 15px; color: rgb(34, 34, 34); line-height: 22px;\">Thanks.</p>\r\n"
 				+ "                <p style=\"font-size: 14px; font-weight: bold; color: rgb(34, 34, 34)\">\r\n"
 				+ "                    Security tips:\r\n"
@@ -286,12 +286,12 @@ public class WithdrawalService {
 				+ "             \">\r\n"
 				+ "                    <li>Never give your password to anyone</li>\r\n"
 				+ "                    <li>\r\n"
-				+ "                        Never call any phone number for someone claiming to be FXSylverline\r\n"
+				+ "                        Never call any phone number for someone claiming to be StandardFX\r\n"
 				+ "                        Support\r\n"
 				+ "                    </li>\r\n"
 				+ "                    <li>\r\n"
 				+ "                        Never send any money to anyone claiming to be a member of\r\n"
-				+ "                        FXSylverline team\r\n"
+				+ "                        StandardFX team\r\n"
 				+ "                    </li>\r\n"
 				+ "                    <li>Enable Google Two Factor Authentication.</li>\r\n"
 				+ "                </ol>\r\n"
@@ -299,7 +299,7 @@ public class WithdrawalService {
 				+ "                    If you don't recognize this activity, please contact our customer\r\n"
 				+ "                    support immediately.\r\n"
 				+ "                </p>\r\n"
-				+ "                <p style=\"font-size: 12px; color: rgb(34, 34, 34)\">FXSylverline Team</p>\r\n"
+				+ "                <p style=\"font-size: 12px; color: rgb(34, 34, 34)\">StandardFX Team</p>\r\n"
 				+ "\r\n"
 				+ "            </div>\r\n"
 				+ "        </div>\r\n"

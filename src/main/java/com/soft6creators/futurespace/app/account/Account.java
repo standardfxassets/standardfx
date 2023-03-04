@@ -18,7 +18,7 @@ public class Account {
 	private int accountId;
 	@OneToOne
 	private Crypto interestPreference;
-	private int accountBalance;
+	private double accountBalance;
 	public int getAccountId() {
 		return accountId;
 	}
@@ -31,10 +31,10 @@ public class Account {
 	public void setInterestPreference(Crypto interestPreference) {
 		this.interestPreference = interestPreference;
 	}
-	public int getAccountBalance() {
+	public double getAccountBalance() {
 		return accountBalance;
 	}
-	public void setAccountBalance(int accountBalance) {
+	public void setAccountBalance(double accountBalance) {
 		this.accountBalance = accountBalance;
 	}
 	

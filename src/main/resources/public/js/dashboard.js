@@ -33,6 +33,11 @@ let cryptos;
 let cryptoUpdate = [];
 let hasInvestment;
 
+let account;
+
+let accrued = 0;
+let addedAmount = 0;
+
 getCryptoUpdate();
 
 let isSettingsOpened = false;
@@ -55,9 +60,7 @@ getUserXhr.onreadystatechange = function () {
           `/get-started.html?status=verify&useremail=${response.email}`
         );
       } else {
-        location.replace(
-          `/address.html?email=${response.email}`
-        );
+        location.replace(`/address.html?email=${response.email}`);
       }
     } else {
       let firstName = response.fullName.split(" ", 1);
@@ -79,18 +82,18 @@ setTimeout(function () {
 
 paymentInfoSelection(document.getElementById("usd-info"));
 
+let receive = document.getElementById("receive");
 document.body.addEventListener("input", function (e) {
   if (
-    withdrawEtx.value <= userDetail.account.accountBalance &&
-    withdrawEtx.value.length != 0 &&
-    userDetail.account.accountBalance > 500 &&
-    hasInvestment == false
+    parseFloat(withdrawEtx.value) <= accrued &&
+    withdrawEtx.value.length != 0
   ) {
     withdrawBtn.classList.replace(
       "blue-background-inactive",
       "blue-background"
     );
     canWithdraw = true;
+    receive.innerText = withdrawEtx.value;
   } else {
     withdrawBtn.classList.replace(
       "blue-background",
@@ -251,9 +254,6 @@ document.body.addEventListener("click", function (e) {
     document.getElementById("select-crypto").textContent = "Binance (BNB)";
     paymentInfoSelection(document.getElementById("bnb-info"));
   } else if (e.target.id == "copy") {
-    console.log(
-      e.target.parentElement.previousElementSibling.children[0].value
-    );
     e.target.parentElement.previousElementSibling.children[0].select();
     e.target.parentElement.previousElementSibling.children[0].setSelectionRange(
       0,
@@ -296,13 +296,11 @@ document.body.addEventListener("click", function (e) {
   } else if (e.target.id == "save-wallet") {
     saveWallet();
   } else if (e.target.id == "select-crypto-wallet") {
-    console.log("Selected");
     document.getElementById("add-wallet-modal").style.display = "block";
   } else if (
     e.target.id == "open-invest-modal-1" ||
     e.target.id == "open-invest-modal-2"
   ) {
-    console.log("Yeah");
     document.getElementById("investment-plan-modal").style.display = "block";
   } else if (e.target.id == "select-wire-payment") {
     tidioChatApi.open();
@@ -335,27 +333,25 @@ function withdraw() {
     showWithdrawalOTP();
   }, 2000);
 
-  	let withdrawalPayload = {
-      user: userDetail,
-      amount: withdrawEtx.value,
-      withdrawalStatus: "Pending",
-      crypto: {cryptoId: document.getElementById("choose-crypto").value},
-      walletAddress: document.getElementById("wallet-address").value,
-      date: moment()
+  let withdrawalPayload = {
+    user: userDetail,
+    amount: parseFloat(withdrawEtx.value),
+    withdrawalStatus: "pending",
+    crypto: { cryptoId: document.getElementById("choose-crypto").value },
+    walletAddress: document.getElementById("wallet-address").value,
+    date: moment(),
+  };
+
+  let withdrawalXhr = new XMLHttpRequest();
+  withdrawalXhr.open("POST", "/withdrawal", true);
+  withdrawalXhr.setRequestHeader("Content-Type", "application/json");
+  withdrawalXhr.send(JSON.stringify(withdrawalPayload));
+
+  withdrawalXhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      let response = JSON.parse(this.response);
     }
-  
-  	let withdrawalXhr = new XMLHttpRequest();
-  	withdrawalXhr.open("POST", "/withdrawal", true);
-  	withdrawalXhr.setRequestHeader("Content-Type", "application/json");
-    console.log(withdrawalPayload);
-  	withdrawalXhr.send(JSON.stringify(withdrawalPayload));
-  
-  	withdrawalXhr.onreadystatechange = function() {
-  		if (this.readyState == 4 && this.status == 200) {
-  			let response = JSON.parse(this.response);
-  			location.reload();
-  		}
-  	}
+  };
 }
 
 function showWithdrawalOTP() {
@@ -447,22 +443,8 @@ function arrangeInterest() {
     document.getElementById("crypto-root-2").innerHTML += bindCrypto(crypto);
   });
 }
-
 function getAccount() {
-  let account = userDetail.account;
-  document.getElementById("available-to-withdraw").innerText = 
-    account.accountBalance.toFixed(1)
-  document.getElementById("account-balance").innerText = numberWithCommas(
-    account.accountBalance.toFixed(1)
-  );
-  let spinner = document.getElementById("dashboard-spinner");
-  spinner.className = spinner.className.replace("opacity-1", "opacity-2");
-  document.getElementById("dashboard-container").style.display = "block";
-  setTimeout(function () {
-    spinner.style.display = "block";
-  }, 100);
-  getCryptos();
-
+  account = userDetail.account;
   let investmentXhr = new XMLHttpRequest();
   investmentXhr.open(
     "GET",
@@ -485,52 +467,89 @@ function getAccount() {
         document.getElementById("interest-account").innerText =
           response.investedAmount.toFixed(1);
         let startTime = moment(response.startDate);
-        let currentTime = moment();
+        // let currentTime = moment();
+        let currentTime = moment(moment()).add(96, "hours");
         let endTime = moment(response.endDate);
         let elapsedTime = currentTime.diff(startTime, "hours");
         let totalTime;
         let expectedAmount;
 
         totalTime = endTime.diff(startTime, "hours");
+
         expectedAmount = (response.investedAmount * response.percentage) / 100;
 
-        if (endTime.diff(currentTime, "minutes") <= 0) {
-          document.getElementById("payment-percent").style.width = `${100}%`;
-          document.getElementById("accrued-interest").textContent = (0).toFixed(
-            1
-          );
-          document.getElementById("paid-interest").textContent =
-            (account.accountBalance).toFixed(2);
-          document.getElementById("interest-account").innerText =
-            account.accountBalance.toFixed(1);
+        let currentPercent = totalTime / elapsedTime;
 
-          investmentComplete(response, expectedAmount + account.accountBalance);
-        } else {
-          let currentPercent = (100 * elapsedTime) / totalTime;
+        addedAmount = expectedAmount / currentPercent;
 
-          console.log("expected amount", expectedAmount);
-          console.log("elapsed time", elapsedTime);
-          console.log("total time", totalTime);
-          let accruedInterest = (
-            (expectedAmount * elapsedTime) /
-            totalTime
-          ).toFixed(2);
-          console.log(accruedInterest);
-          document.getElementById(
-            "payment-percent"
-          ).style.width = `${currentPercent}%`;
+        console.log(addedAmount)
 
-          document.getElementById("accrued-interest").textContent =
-            accruedInterest;
-          document.getElementById("paid-interest").textContent = (0).toFixed(1);
-        }
+
+        accrued = parseFloat(addedAmount.toFixed(1));
+
+
+        // console.log("Total", totalTime);
+        // console.log("Elapsed", elapsedTime);
+        // console.log("Current percent", currentPercent);
+        // console.log("Current Amount", response.investedAmount + addedAmount);
+
+        document.getElementById("accrued-interest").textContent =
+          addedAmount.toFixed(1);
+        document.getElementById("paid-interest").textContent = (0).toFixed(1);
+
+        document.getElementById("payment-percent").style.width = `${100}%`;
       }
+      getWithdrawals();
+      let spinner = document.getElementById("dashboard-spinner");
+      spinner.className = spinner.className.replace("opacity-1", "opacity-2");
+      document.getElementById("dashboard-container").style.display = "block";
+      setTimeout(function () {
+        spinner.style.display = "none";
+      }, 100);
+      getCryptos();
+    }
+  };
+}
+
+function getWithdrawals() {
+  let allWithdrawals = 0;
+  let successfulWithdrawals = 0;
+  let withdrawalXhr = new XMLHttpRequest();
+  withdrawalXhr.open(
+    "GET",
+    `/user/${userEmail}/withdrawal`,
+    true
+  );
+  withdrawalXhr.send();
+
+  withdrawalXhr.onreadystatechange = function () {
+    if (this.status == 200 && this.readyState == 4) {
+      let response = JSON.parse(this.response);
+      if (response.length != 0) {
+        response.forEach(function (item) {
+          allWithdrawals += item.amount;
+          if (item.withdrawalStatus == "successful") {
+            successfulWithdrawals += item.amount;
+          }
+        });
+      }
+      console.log(accrued)
+      document.getElementById("account-balance").innerText = numberWithCommas(
+        (account.accountBalance + accrued - allWithdrawals).toFixed(1)
+      );
+      document.getElementById("accrued-interest").textContent = (
+        accrued
+      ).toFixed(1);
+      accrued = accrued - allWithdrawals;
+      document.getElementById("paid-interest").textContent =
+        successfulWithdrawals.toFixed(1);
+      document.getElementById("available-to-withdraw").innerText =
+        accrued.toFixed(1);
     }
   };
 }
 
 function investmentComplete(investment, expectedAmount) {
-  console.log(expectedAmount);
   if (investment.active) {
     let investmentCompleteXhr = new XMLHttpRequest();
     investmentCompleteXhr.open(
@@ -678,7 +697,6 @@ function getCryptos() {
   cryptoXhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       let response = JSON.parse(this.response);
-      console.log(response);
       response.forEach(function (item, index) {
         if (index == 0) {
         } else {

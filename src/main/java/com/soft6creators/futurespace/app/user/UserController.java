@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.soft6creators.futurespace.app.address.Address;
 import com.soft6creators.futurespace.app.address.AddressService;
 
+@CrossOrigin
 @RestController
 public class UserController {
 	@Autowired

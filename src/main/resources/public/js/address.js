@@ -71,21 +71,21 @@ document.body.addEventListener("click", function(e) {
 	let targetId = e.target.id;
 	if (targetId == "proceed-address") {
 		if (addressValidated) {
-			e.target.classList.remove("blue-background-light");
+			e.target.classList.remove("blue-background-light-2");
 			e.target.innerHTML =
 				"<span class='fa fa-spinner fa-spin w3-large blue-text'></span>";
 			changeCard(addressCard, mobileNumberCard);
 		}
 	} else if (targetId == "proceed-mobile-number") {
 		if (mobileNumberValidated) {
-			e.target.classList.remove("blue-background-light");
+			e.target.classList.remove("blue-background-light-2");
 			e.target.innerHTML =
 				"<span class='fa fa-spinner fa-spin w3-large blue-text'></span>";
 			changeCard(mobileNumberCard, sourceCard);
 		}
 	} else if (targetId == "proceed-source") {
 		if (sourceValidated) {
-			e.target.classList.remove("blue-background-light");
+			e.target.classList.remove("blue-background-light-2");
 			e.target.innerHTML =
 				"<span class='fa fa-spinner fa-spin w3-large blue-text'></span>";
 			addAddress();
@@ -105,12 +105,12 @@ document.body.addEventListener("click", function(e) {
 		if (source.length != 0) {
 			document.getElementById("proceed-source").className = document
 				.getElementById("proceed-source")
-				.className.replace("blue-background-inactive", "blue-background-light");
+				.className.replace("blue-background-inactive", "blue-background-light-2");
 			sourceValidated = true;
 		} else {
 			document.getElementById("proceed-source").className = document
 				.getElementById("proceed-source")
-				.className.replace("blue-background-light", "blue-background-inactive");
+				.className.replace("blue-background-light-2", "blue-background-inactive");
 			sourceValidated = false;
 		}
 	}
@@ -172,11 +172,11 @@ function validate(button) {
 		addressValidated = true;
 		button.className = button.className.replace(
 			"blue-background-inactive",
-			"blue-background-light"
+			"blue-background-light-2"
 		);
 	} else {
 		button.className = button.className.replace(
-			"blue-background-light",
+			"blue-background-light-2",
 			"blue-background-inactive"
 		);
 		addressValidated = false;
@@ -187,12 +187,12 @@ function validate2(button) {
 	if (mobileNumber.value != "") {
 		button.className = button.className.replace(
 			"blue-background-inactive",
-			"blue-background-light"
+			"blue-background-light-2"
 		);
 		mobileNumberValidated = true;
 	} else {
 		button.className = button.className.replace(
-			"blue-background-light",
+			"blue-background-light-2",
 			"blue-background-inactive"
 		);
 		mobileNumberValidated = false;

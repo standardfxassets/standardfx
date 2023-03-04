@@ -17,7 +17,7 @@ public class Withdrawal {
 	private int withdrawalId;
 	@ManyToOne
 	private User user;
-	private int amount;
+	private double amount;
 	private String withdrawalStatus;
 	@OneToOne
 	private Crypto crypto;
@@ -35,10 +35,10 @@ public class Withdrawal {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	public int getAmount() {
+	public double getAmount() {
 		return amount;
 	}
-	public void setAmount(int amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 	public String getWithdrawalStatus() {

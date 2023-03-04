@@ -12,6 +12,9 @@ let chatBox = document.getElementById("chat-box");
 let adminStatus = document.getElementById("status");
 let lastSeen = document.getElementById("last-seen");
 
+let accrued;
+let addedAmount;
+
 let days;
 
 document.body.addEventListener("click", function (e) {
@@ -25,8 +28,7 @@ document.body.addEventListener("click", function (e) {
   } else if (target.id == "successful") {
     getSuccessfulWithdrawals();
     changeOption(target);
-  }
-  else if (target.id == "declined") {
+  } else if (target.id == "declined") {
     getDeclinedWithdrawals();
     changeOption(target);
   } else if (target.id == "fund-account") {
@@ -54,22 +56,20 @@ document.body.addEventListener("click", function (e) {
   } else if (target.id == "update-trade") {
     startTrade();
   } else if (target.classList.contains("user-withdrawal")) {
-    let fromUser =
+    let withdrawalId =
       target.parentElement.parentElement.previousElementSibling
         .previousElementSibling.value;
-    toUser = fromUser;
-    getWithdrawalDetails();
+    getWithdrawalDetails(withdrawalId);
   } else if (target.id == "approve") {
-    modifyWithdrawal("Successful");
+    modifyWithdrawal("successful");
   } else if (target.id == "decline") {
-    modifyWithdrawal("Declined");
+    modifyWithdrawal("declined");
   }
 });
 
 getAllUsers();
 
 function startInvestment() {
-  console.log("Hello world");
   let investment = {
     account: { accountId: account.accountId },
     investedAmount: investedAmountEtx.value,
@@ -112,11 +112,11 @@ function startTrade() {
   };
 }
 
-function getWithdrawalDetails() {
+function getWithdrawalDetails(withdrawalId) {
   let withdrawalDetailsXhr = new XMLHttpRequest();
   withdrawalDetailsXhr.open(
     "GET",
-    `/user/${toUser}/withdrawal`,
+    `/withdrawal/${withdrawalId}`,
     true
   );
   withdrawalDetailsXhr.send();
@@ -128,7 +128,7 @@ function getWithdrawalDetails() {
       let userAddressXhr = new XMLHttpRequest();
       userAddressXhr.open(
         "GET",
-        `/address/user/${toUser}`,
+        `/address/user/${withdrawal.user.email}`,
         true
       );
       userAddressXhr.send();
@@ -136,6 +136,7 @@ function getWithdrawalDetails() {
       userAddressXhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
           let response = JSON.parse(this.response);
+          console.log(withdrawalResponse);
           document.getElementById("user-info-root").innerHTML =
             bindWithdrawalInfo(withdrawalResponse);
           document.getElementById("info-modal").style.display = "block";
@@ -165,63 +166,118 @@ function getWithdrawalDetails() {
                   "withdrawal-paid-interest"
                 ).textContent = (0).toFixed(1);
               } else {
-                hasInvestment = response.active;
-                document.getElementById(
-                  "withdrawal-interest-account"
-                ).innerText = response.investedAmount.toFixed(1);
                 let startTime = moment(response.startDate);
-                let currentTime = moment();
+                // let currentTime = moment();
+                let currentTime = moment(moment()).add(72, "hours");
                 let endTime = moment(response.endDate);
                 let elapsedTime = currentTime.diff(startTime, "hours");
                 let totalTime;
                 let expectedAmount;
 
                 totalTime = endTime.diff(startTime, "hours");
+
                 expectedAmount =
                   (response.investedAmount * response.percentage) / 100;
 
-                if (endTime.diff(currentTime, "minutes") <= 0) {
-                  document.getElementById(
-                    "payment-percent"
-                  ).style.width = `${100}%`;
-                  document.getElementById(
-                    "withdrawal-accrued-interest"
-                  ).textContent = (0).toFixed(1);
-                  document.getElementById(
-                    "withdrawal-paid-interest"
-                  ).textContent = (
-                    account.accountBalance
-                  ).toFixed(2);
-                  document.getElementById(
-                    "withdrawal-interest-account"
-                  ).innerText = account.accountBalance.toFixed(1);
-                } else {
-                  let currentPercent = (100 * elapsedTime) / totalTime;
+                let currentPercent = totalTime / elapsedTime;
 
-                  console.log("expected amount", expectedAmount);
-                  console.log("elapsed time", elapsedTime);
-                  console.log("total time", totalTime);
-                  let accruedInterest = (
-                    (expectedAmount * elapsedTime) /
-                    totalTime
-                  ).toFixed(2);
-                  console.log(accruedInterest);
-                  document.getElementById(
-                    "payment-percent"
-                  ).style.width = `${currentPercent}%`;
+                addedAmount = expectedAmount / currentPercent;
 
-                  document.getElementById(
-                    "withdrawal-accrued-interest"
-                  ).textContent = accruedInterest;
-                  document.getElementById(
-                    "withdrawal-paid-interest"
-                  ).textContent = (0).toFixed(1);
-                }
+                console.log(addedAmount);
+
+                accrued = parseFloat(addedAmount.toFixed(1));
+
+                document.getElementById(
+                  "withdrawal-interest-account"
+                ).innerText = response.investedAmount.toFixed(1);
+
+                document.getElementById(
+                  "withdrawal-accrued-interest"
+                ).textContent = addedAmount.toFixed(1);
+                document.getElementById(
+                  "withdrawal-paid-interest"
+                ).textContent = (0).toFixed(1);
+
+                document.getElementById(
+                  "payment-percent"
+                ).style.width = `${100}%`;
               }
+              getWithdrawals2(withdrawal.user.email);
             }
           };
         }
       };
+    }
+  };
+}
+
+function getWithdrawals() {
+  let allWithdrawals = 0;
+  let successfulWithdrawals = 0;
+  let withdrawalXhr = new XMLHttpRequest();
+  withdrawalXhr.open("GET", `/user/${toUser}/withdrawal`, true);
+  withdrawalXhr.send();
+
+  withdrawalXhr.onreadystatechange = function () {
+    if (this.status == 200 && this.readyState == 4) {
+      let response = JSON.parse(this.response);
+      if (response.length != 0) {
+        response.forEach(function (item) {
+          allWithdrawals += item.amount;
+          if (item.withdrawalStatus == "successful") {
+            successfulWithdrawals += item.amount;
+          }
+        });
+      }
+      document.getElementById("account-balance").innerText = (
+        account.accountBalance +
+        accrued -
+        allWithdrawals
+      ).toFixed(1);
+
+      document.getElementById("accrued-interest").textContent =
+        accrued.toFixed(1);
+      accrued = accrued - allWithdrawals;
+      document.getElementById("paid-interest").textContent =
+        successfulWithdrawals.toFixed(1);
+    }
+  };
+}
+
+function getWithdrawals2(userEmail) {
+  let allWithdrawals = 0;
+  let successfulWithdrawals = 0;
+  let withdrawalXhr = new XMLHttpRequest();
+  withdrawalXhr.open(
+    "GET",
+    `/user/${userEmail}/withdrawal`,
+    true
+  );
+  withdrawalXhr.send();
+
+  withdrawalXhr.onreadystatechange = function () {
+    if (this.status == 200 && this.readyState == 4) {
+      let response = JSON.parse(this.response);
+      if (response.length != 0) {
+        response.forEach(function (item) {
+          allWithdrawals += item.amount;
+          if (item.withdrawalStatus == "successful") {
+            successfulWithdrawals += item.amount;
+          }
+        });
+      }
+      console.log(accrued);
+      document.getElementById("withdrawal-account-balance").innerText = (
+        account.accountBalance +
+        accrued -
+        allWithdrawals
+      ).toFixed(1);
+
+      document.getElementById("withdrawal-accrued-interest").textContent =
+        accrued.toFixed(1);
+      accrued = accrued - allWithdrawals;
+      document.getElementById("withdrawal-paid-interest").textContent =
+        successfulWithdrawals.toFixed(1);
     }
   };
 }
@@ -291,9 +347,8 @@ function getUserDetails() {
               ).style.width = `${100}%`;
               document.getElementById("accrued-interest").textContent =
                 (0).toFixed(1);
-              document.getElementById("paid-interest").textContent = (
-                account.accountBalance
-              ).toFixed(2);
+              document.getElementById("paid-interest").textContent =
+                account.accountBalance.toFixed(2);
               document.getElementById("interest-account").innerText =
                 account.accountBalance.toFixed(1);
 
@@ -302,26 +357,46 @@ function getUserDetails() {
                 expectedAmount + account.accountBalance
               );
             } else {
-              let currentPercent = (100 * elapsedTime) / totalTime;
+              hasInvestment = response.active;
+              document.getElementById("interest-account").innerText =
+                response.investedAmount.toFixed(1);
+              let startTime = moment(response.startDate);
+              // let currentTime = moment();
+              let currentTime = moment(moment()).add(72, "hours");
+              let endTime = moment(response.endDate);
+              let elapsedTime = currentTime.diff(startTime, "hours");
+              let totalTime;
+              let expectedAmount;
 
-              console.log("expected amount", expectedAmount);
-              console.log("elapsed time", elapsedTime);
-              console.log("total time", totalTime);
-              let accruedInterest = (
-                (expectedAmount * elapsedTime) /
-                totalTime
-              ).toFixed(2);
-              console.log(accruedInterest);
-              document.getElementById(
-                "payment-percent"
-              ).style.width = `${currentPercent}%`;
+              totalTime = endTime.diff(startTime, "hours");
+
+              expectedAmount =
+                (response.investedAmount * response.percentage) / 100;
+
+              let currentPercent = totalTime / elapsedTime;
+
+              addedAmount = expectedAmount / currentPercent;
+
+              console.log(addedAmount);
+
+              accrued = parseFloat(addedAmount.toFixed(1));
+
+              // console.log("Total", totalTime);
+              // console.log("Elapsed", elapsedTime);
+              // console.log("Current percent", currentPercent);
+              // console.log("Current Amount", response.investedAmount + addedAmount);
 
               document.getElementById("accrued-interest").textContent =
-                accruedInterest;
+                addedAmount.toFixed(1);
               document.getElementById("paid-interest").textContent =
                 (0).toFixed(1);
+
+              document.getElementById(
+                "payment-percent"
+              ).style.width = `${100}%`;
             }
           }
+          getWithdrawals();
         }
       };
     }
@@ -375,8 +450,8 @@ function getAllUsers() {
   allUsersXhr.send();
   document.getElementById(
     "distinct-message-root"
-  ).innerHTML = `<div id="distinct-message-spinner" class="fa fa-spinner fa-spin xx-large green-text opacity-1"
-							style="position: absolute; left: 150px; top: 200px"></div>`;
+  ).innerHTML = `<div id="distinct-message-spinner" class="fa fa-spinner fa-spin x-large blue-text opacity-1"
+							style="position: absolute; left: 45%; top: 30%;"></div>`;
 
   allUsersXhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -416,8 +491,11 @@ function getPendingWithdrawals() {
       let response = JSON.parse(this.response);
       document.getElementById("distinct-message-root").innerHTML = "";
       response.forEach(function (item) {
+        console.log(item);
+
         document.getElementById("distinct-message-root").innerHTML +=
           bindWithdrawalStatus(
+            item.withdrawalId,
             item.user.email,
             item.user.fullName,
             item.amount,
@@ -440,7 +518,7 @@ function modifyWithdrawal(status) {
   };
   let withdrawalXhr = new XMLHttpRequest();
   withdrawalXhr.open("PUT", "/withdrawal", true);
-  withdrawalXhr.setRequestHeader("Content-Type", "application/json")
+  withdrawalXhr.setRequestHeader("Content-Type", "application/json");
   withdrawalXhr.send(JSON.stringify(withdrawalPayload));
 
   withdrawalXhr.onreadystatechange = function () {
@@ -453,7 +531,7 @@ function modifyWithdrawal(status) {
 
 function getSuccessfulWithdrawals() {
   let withdrawalXhr = new XMLHttpRequest();
-  withdrawalXhr.open("GET", `/withdrawals/Successful`, true);
+  withdrawalXhr.open("GET", `/withdrawals/successful`, true);
   withdrawalXhr.send();
 
   withdrawalXhr.onreadystatechange = function () {
@@ -463,10 +541,11 @@ function getSuccessfulWithdrawals() {
       response.forEach(function (item) {
         document.getElementById("distinct-message-root").innerHTML +=
           bindWithdrawalStatus(
+            item.withdrawalId,
             item.user.email,
             item.user.fullName,
             item.amount,
-            "withdrawal was " + item.withdrawalStatus
+            "Withdrawal was " + item.withdrawalStatus
           );
       });
     }
@@ -475,7 +554,7 @@ function getSuccessfulWithdrawals() {
 
 function getDeclinedWithdrawals() {
   let withdrawalXhr = new XMLHttpRequest();
-  withdrawalXhr.open("GET", `/withdrawals/Declined`, true);
+  withdrawalXhr.open("GET", `/withdrawals/declined`, true);
   withdrawalXhr.send();
 
   withdrawalXhr.onreadystatechange = function () {
@@ -620,7 +699,7 @@ function bindUserInfo(info) {
                     Total Dollar Value of Crypto
                   </p>
                   <p class="w3-center large blue-text-dash">
-                    $<span>${info.user.account.accountBalance}</span>
+                    $<span id="account-balance"></span>
                   </p>
                   <div class="w3-row-padding w3-center">
                     <div class="w3-col s6">
@@ -698,12 +777,12 @@ function bindUserInfo(info) {
                   <div class="w3-row-padding" style="margin: 32px 0px;">
                   <div class="w3-col s6"><div
                       id="fund"
-                      class="w3-padding w3-center w3-border blue-background-light small w3-round w3-hover-none" style="font-weight: 600">
+                      class="w3-padding w3-center w3-border blue-background small w3-round" style="font-weight: 600">
                       FUND INVEST
                     </div></div>
                   <div class="w3-col s6"><div
                       id="fund-trade"
-                      class="w3-padding w3-center w3-border small w3-round w3-hover-none" style="font-weight: 600">
+                      class="w3-padding w3-center w3-border small w3-round" style="font-weight: 600">
                       FUND TRADE
                     </div></div>
                     
@@ -714,6 +793,10 @@ function bindUserInfo(info) {
 }
 
 function bindWithdrawalInfo(info) {
+  let withdraw = "Withdrawal Amount";
+  if (info.withdrawalStatus == "successful") {
+    withdraw = "Approved Amount";
+  }
   return `
   <div>
   <div class="w3-border-right">
@@ -790,7 +873,7 @@ function bindWithdrawalInfo(info) {
           Total Dollar Value of Investment
         </p>
         <p class="w3-center large blue-text-dash">
-          $<span>${info.user.account.accountBalance}</span>
+          $<span id="withdrawal-account-balance"></span>
         </p>
         <div class="w3-row-padding w3-center">
           <div class="w3-col s6">
@@ -798,7 +881,7 @@ function bindWithdrawalInfo(info) {
               class="no-margin-2 big blue-text-dash"
               style="font-weight: 600"
             >
-              Withdrawal Amount:
+              ${withdraw}:
             </p>
             <p class="no-margin-2 big blue-text-dash" style="font-weight: 600;">
               $<span id="withdrawal-amount" style="font-weight: 600;"></span>
@@ -849,12 +932,12 @@ function bindWithdrawalInfo(info) {
         <div class="w3-row-padding" style="margin: 32px 0px;">
         <div class="w3-col s6"><div
             id="approve"
-            class="w3-padding w3-center w3-border blue-background-light small w3-round w3-hover-none" style="font-weight: 600">
+            class="w3-padding w3-center w3-border blue-background small w3-round" style="font-weight: 600">
             APPROVE
           </div></div>
         <div class="w3-col s6"><div
             id="decline"
-            class="w3-padding w3-center w3-border small w3-round w3-hover-none" style="font-weight: 600">
+            class="w3-padding w3-center w3-border small w3-round" style="font-weight: 600">
             DECLINE
           </div></div>
           
@@ -1000,7 +1083,7 @@ function bindWithdrawalInfo2(info) {
         <div class="w3-row-padding" style="margin: 32px 0px;">
         <div class="w3-col s6"><div
             id="approve"
-            class="w3-padding w3-center w3-border blue-background-light small w3-round w3-hover-none" style="font-weight: 600">
+            class="w3-padding w3-center w3-border blue-background small w3-round w3-hover-none" style="font-weight: 600">
             APPROVE
           </div></div>
         
@@ -1053,14 +1136,14 @@ function bindUserStatus(email, fullName, message, date) {
 	</div>`;
 }
 
-function bindWithdrawalStatus(email, fullName, amount, date) {
+function bindWithdrawalStatus(withdrawalId, email, fullName, amount, date) {
   return `
 	<div class="w3-white w3-animate-opacity">
 		<div
     class="w3-row w3-padding-large pointer"
     
   >
-	<input type="hidden" value=${email} />
+	<input type="hidden" value=${withdrawalId} />
     <div class="w3-col s2" style="position: relative">
       <img
         src="./images/user.png"
@@ -1072,7 +1155,7 @@ function bindWithdrawalStatus(email, fullName, amount, date) {
     <div class="w3-col s5">
 		<div class="w3-left">
 			<p class="no-margin small user-withdrawal">${fullName}</p>
-      		<p class="no-margin small w3-text-green" style="font-weight: 600">
+      		<p class="no-margin small blue-text" style="font-weight: 600">
         	Amount: $${amount}
       		</p>
 		</div>

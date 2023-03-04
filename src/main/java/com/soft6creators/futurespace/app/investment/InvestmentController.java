@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.soft6creators.futurespace.app.account.Account;
 import com.soft6creators.futurespace.app.account.AccountService;
 
+@CrossOrigin
 @RestController
 public class InvestmentController {
 	@Autowired

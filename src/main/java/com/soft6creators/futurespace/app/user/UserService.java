@@ -53,20 +53,20 @@ public class UserService {
 			}
 		}
 
-		try {
-			sendVerificationEmail(user);
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			sendVerificationEmail(user);
+//		} catch (MessagingException e) {
+//			e.printStackTrace();
+//		} catch (UnsupportedEncodingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		Account account = new Account();
 		if (user.getReferral() != null) {
-			account.setAccountBalance(20);
+			account.setAccountBalance(0.0);
 		}
 		else {
-			account.setAccountBalance(20);
+			account.setAccountBalance(0.0);
 		}
 		accountService.addAccount(account);
 		user.setAccount(account);
@@ -100,7 +100,7 @@ public class UserService {
 
 	private void sendVerificationEmail(User user) throws MessagingException, UnsupportedEncodingException {
 		String toAddress = user.getEmail();
-		String subject = "FXSylverline (One time password)";
+		String subject = "StandardFX (One time password)";
 		String content = " <div>\n"
 				+ "        <style>\n"
 				+ "            #container {\n"

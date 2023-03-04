@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin
 @RestController
 public class WithdrawalController {
 	@Autowired
@@ -38,8 +39,8 @@ public class WithdrawalController {
 	
 	@CrossOrigin(maxAge = 3600)
 	@RequestMapping("/user/{userEmail}/withdrawal")
-	public Optional<Withdrawal> getWithdrawalByUser(@PathVariable String userEmail) {
-		return withdrawalService.getWithdrawalByUser(userEmail);
+	public List<Withdrawal> getWithdrawalByUser(@PathVariable String userEmail) {
+		return withdrawalService.getWithdrawalsByUser(userEmail);
 	}
 	
 	@CrossOrigin(maxAge = 3600)
