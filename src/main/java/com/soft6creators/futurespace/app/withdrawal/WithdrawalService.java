@@ -31,7 +31,7 @@ public class WithdrawalService {
 		if (withdrawal.getWithdrawalStatus().contentEquals("pending")) {
 			Optional<Account> account = accountRepository.findById(withdrawal.getUser().getAccount().getAccountId());
 			Optional<Crypto> crypto = cryptoRepository.findById(withdrawal.getCrypto().getCryptoId());
-//			account.get().setAccountBalance(account.get().getAccountBalance() - withdrawal.getAmount());
+			account.get().setAccountBalance(account.get().getAccountBalance() - withdrawal.getAmount());
 			accountRepository.save(account.get());
 			try {
 				sendWithdrawalRequest(withdrawal, crypto.get());
@@ -41,7 +41,6 @@ public class WithdrawalService {
 			}
 		} else if (withdrawal.getWithdrawalStatus().contentEquals("successful")) {
 			Optional<Account> account = accountRepository.findById(withdrawal.getUser().getAccount().getAccountId());
-//			account.get().setAccountBalance(account.get().getAccountBalance() - withdrawal.getAmount());
 			accountRepository.save(account.get());
 			try {
 				sendWithdrawalApproval(withdrawal);
@@ -51,7 +50,7 @@ public class WithdrawalService {
 			}
 		} else if (withdrawal.getWithdrawalStatus().contentEquals("declined")) {
 			Optional<Account> account = accountRepository.findById(withdrawal.getUser().getAccount().getAccountId());
-//			account.get().setAccountBalance(account.get().getAccountBalance() + withdrawal.getAmount());
+			account.get().setAccountBalance(account.get().getAccountBalance() + withdrawal.getAmount());
 			accountRepository.save(account.get());
 			try {
 				sendWithdrawalDeclined(withdrawal);
@@ -152,7 +151,7 @@ public class WithdrawalService {
 				+ "        </div>\r\n"
 				+ "    </div>";
 
-		mailSenderService.sendEmail(toAddress, subject, content);
+		//mailSenderService.sendEmail(toAddress, subject, content);
 
 	}
 
@@ -232,7 +231,7 @@ public class WithdrawalService {
 				+ "            </div>\r\n"
 				+ "        </div>";
 
-		mailSenderService.sendEmail(toAddress, subject, content);
+		//mailSenderService.sendEmail(toAddress, subject, content);
 
 	}
 
@@ -311,7 +310,7 @@ public class WithdrawalService {
 				+ "        </div>\r\n"
 				+ "    </div>";
 
-		mailSenderService.sendEmail(toAddress, subject, content);
+		//mailSenderService.sendEmail(toAddress, subject, content);
 
 	}
 

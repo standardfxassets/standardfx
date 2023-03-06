@@ -37,6 +37,7 @@ let account;
 
 let accrued = 0;
 let addedAmount = 0;
+let totalAmount = 0;
 
 getCryptoUpdate();
 
@@ -85,7 +86,7 @@ paymentInfoSelection(document.getElementById("usd-info"));
 let receive = document.getElementById("receive");
 document.body.addEventListener("input", function (e) {
   if (
-    parseFloat(withdrawEtx.value) <= accrued &&
+    parseFloat(withdrawEtx.value) <= totalAmount &&
     withdrawEtx.value.length != 0
   ) {
     withdrawBtn.classList.replace(
@@ -463,7 +464,7 @@ function getAccount() {
       if (response == null) {
         document.getElementById("interest-account").innerText = (0).toFixed(1);
         document.getElementById("accrued-interest").textContent = (0).toFixed(
-          1
+          2
         );
         document.getElementById("paid-interest").textContent = (0).toFixed(1);
       } else {
@@ -489,7 +490,7 @@ function getAccount() {
         console.log(addedAmount)
 
 
-        accrued = parseFloat(addedAmount.toFixed(1));
+        accrued = parseFloat(addedAmount.toFixed(2));
 
 
         // console.log("Total", totalTime);
@@ -498,7 +499,7 @@ function getAccount() {
         // console.log("Current Amount", response.investedAmount + addedAmount);
 
         document.getElementById("accrued-interest").textContent =
-          addedAmount.toFixed(1);
+          addedAmount.toFixed(2);
         document.getElementById("paid-interest").textContent = (0).toFixed(1);
 
         document.getElementById("payment-percent").style.width = `${100}%`;
@@ -538,16 +539,17 @@ function getWithdrawals() {
         });
       }
       document.getElementById("account-balance").innerText = numberWithCommas(
-        (account.accountBalance + accrued - allWithdrawals).toFixed(1)
+        (account.accountBalance + accrued).toFixed(1)
       );
+      totalAmount = account.accountBalance + accrued;
       document.getElementById("accrued-interest").textContent = (
         accrued
-      ).toFixed(1);
+      ).toFixed(2);
       accrued = accrued - allWithdrawals;
       document.getElementById("paid-interest").textContent =
         successfulWithdrawals.toFixed(1);
       document.getElementById("available-to-withdraw").innerText =
-        accrued.toFixed(1);
+        totalAmount.toFixed(1);
     }
   };
 }

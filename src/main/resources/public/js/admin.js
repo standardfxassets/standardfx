@@ -14,6 +14,7 @@ let lastSeen = document.getElementById("last-seen");
 
 let accrued;
 let addedAmount;
+let totalAmount;
 
 let days;
 
@@ -193,7 +194,7 @@ function getWithdrawalDetails(withdrawalId) {
 
                 document.getElementById(
                   "withdrawal-accrued-interest"
-                ).textContent = addedAmount.toFixed(1);
+                ).textContent = addedAmount.toFixed(2);
                 document.getElementById(
                   "withdrawal-paid-interest"
                 ).textContent = (0).toFixed(1);
@@ -234,13 +235,13 @@ function getWithdrawals(userEmail) {
         });
       }
       document.getElementById("account-balance").innerText = (
-        account.accountBalance +
-        accrued -
-        allWithdrawals
+        account.accountBalance + accrued
       ).toFixed(1);
 
+      totalAmount = account.accountBalance + accrued;
+
       document.getElementById("accrued-interest").textContent =
-        accrued.toFixed(1);
+        accrued.toFixed(2);
       accrued = accrued - allWithdrawals;
       document.getElementById("paid-interest").textContent =
         successfulWithdrawals.toFixed(1);
@@ -272,9 +273,7 @@ function getWithdrawals2(userEmail) {
       }
       document.getElementById("withdrawal-account-balance").innerText = (
         account.accountBalance +
-        accrued -
-        allWithdrawals
-      ).toFixed(1);
+        accrued).toFixed(1);
 
       document.getElementById("withdrawal-accrued-interest").textContent =
         accrued.toFixed(1);
@@ -329,6 +328,9 @@ function getUserDetails() {
             document.getElementById("paid-interest").textContent = (0).toFixed(
               1
             );
+            document.getElementById("interest-account").innerText = (0).toFixed(
+              1
+            );
           } else {
             hasInvestment = response.active;
             document.getElementById("interest-account").innerText =
@@ -352,7 +354,7 @@ function getUserDetails() {
 
             console.log(addedAmount);
 
-            accrued = parseFloat(addedAmount.toFixed(1));
+            accrued = parseFloat(addedAmount.toFixed(2));
 
             // console.log("Total", totalTime);
             // console.log("Elapsed", elapsedTime);
