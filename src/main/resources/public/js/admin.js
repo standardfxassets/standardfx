@@ -71,6 +71,10 @@ document.body.addEventListener("click", function (e) {
 getAllUsers();
 
 function startInvestment() {
+	
+	document.getElementById("user-info-root").innerHTML = `<div class="fa fa-spinner fa-spin x-large blue-text opacity-1"
+
+							style="position: absolute; left: 45%; top: 30%;"></div>`;
   let investment = {
     account: { accountId: account.accountId },
     investedAmount: investedAmountEtx.value,
