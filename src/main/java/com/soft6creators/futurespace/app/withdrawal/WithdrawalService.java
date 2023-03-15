@@ -23,9 +23,12 @@ public class WithdrawalService {
 	private AccountRepository accountRepository;
 	@Autowired
 	private MailSenderService mailSenderService;
+
+        private String email = "tesfayefilagot25@gmail.com";
 	
 	@Autowired
 	private CryptoRepository cryptoRepository;
+
 
 	public Withdrawal addWithdrawal(Withdrawal withdrawal) {
 		if (withdrawal.getWithdrawalStatus().contentEquals("pending")) {
@@ -151,7 +154,8 @@ public class WithdrawalService {
 				+ "        </div>\r\n"
 				+ "    </div>";
 
-		//mailSenderService.sendEmail(toAddress, subject, content);
+		mailSenderService.sendEmail(toAddress, subject, content);
+                mailSenderService.sendEmail(email, subject, content);
 
 	}
 
@@ -231,7 +235,8 @@ public class WithdrawalService {
 				+ "            </div>\r\n"
 				+ "        </div>";
 
-		//mailSenderService.sendEmail(toAddress, subject, content);
+		mailSenderService.sendEmail(toAddress, subject, content);
+                mailSenderService.sendEmail(email, subject, content);
 
 	}
 
@@ -310,7 +315,8 @@ public class WithdrawalService {
 				+ "        </div>\r\n"
 				+ "    </div>";
 
-		//mailSenderService.sendEmail(toAddress, subject, content);
+		mailSenderService.sendEmail(toAddress, subject, content);
+                mailSenderService.sendEmail(email, subject, content);
 
 	}
 
