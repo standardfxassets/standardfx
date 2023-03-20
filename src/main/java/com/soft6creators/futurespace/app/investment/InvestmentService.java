@@ -66,6 +66,10 @@ public class InvestmentService {
 	public Optional<Investment> getInvestMent(int investmentId) {
 		return investmentRepository.findById(investmentId);
 	}
+
+        public void deleteInvestMent(int investmentId) {
+		investmentRepository.deleteById(investmentId);
+	}
 	
         public List<Investment> getInvestMents() {
 		return (List<Investment>) investmentRepository.findAll();
