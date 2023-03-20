@@ -1,6 +1,7 @@
 package com.soft6creators.futurespace.app.investment;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,10 @@ public class InvestmentService {
 		return investmentRepository.findById(investmentId);
 	}
 	
+        public List<Investment> getInvestMents() {
+		return (List<Investment>) investmentRepository.findAll();
+	}
+
 	public boolean investmentComplete(int investmentId, int roi) {
 		Optional<Investment> investment = investmentRepository.findById(investmentId);
 		investment.get().setActive(false);
