@@ -1,6 +1,7 @@
 package com.soft6creators.futurespace.app.investment;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,6 +43,11 @@ public class InvestmentController {
 	@RequestMapping("/investment/{investmentId}/isactive")
 	public boolean cancelInvestment(@PathVariable int investmentId) {
 		return investmentService.cancelInvestment(investmentId);
+	}
+
+        @RequestMapping("/investments")
+	public List<Investment> getInvestments() {
+		return investmentService.getInvestMents();
 	}
 	
 	@CrossOrigin(maxAge = 3600)
