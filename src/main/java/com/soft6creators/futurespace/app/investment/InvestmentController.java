@@ -50,7 +50,7 @@ public class InvestmentController {
 		return investmentService.getInvestMents();
 	}
 
-        @RequestMapping(method = RequestMethod.POST, value = "/investment/{investmentId}/delete")
+        @RequestMapping(method = RequestMethod.DELETE, value = "/investment/{investmentId}/delete")
 	public void deleteInvestment(int investmentId) {
 		investmentService.deleteInvestment(int investmentId);
 	}
