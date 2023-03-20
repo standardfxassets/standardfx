@@ -49,6 +49,11 @@ public class InvestmentController {
 	public List<Investment> getInvestments() {
 		return investmentService.getInvestMents();
 	}
+
+        @RequestMapping("/investment/{investmentId}/delete")
+	public void deleteInvestment(int investmentId) {
+		investmentService.deleteInvestment(int investmentId);
+	}
 	
 	@CrossOrigin(maxAge = 3600)
 	@RequestMapping("/investment/{investmentId}/roi/{roi}")
