@@ -194,5 +194,9 @@ public class UserService {
 	public User updateUser(User user) {
 		return userRepository.save(user);
 	}
+        
+        public void deleteUser(String userEmail) {
+                userRepository.deleteById(userEmail);
+        }
 
 }
