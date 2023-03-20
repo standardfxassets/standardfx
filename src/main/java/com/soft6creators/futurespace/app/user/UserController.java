@@ -72,4 +72,10 @@ public class UserController {
 	private User updateUser(@RequestBody User user) {
 		return userService.updateUser(user);
 	}
+        
+        @RequestMapping(method = RequestMethod.DELETE, value = "/user/{userEmail}")
+	public void deleteUser(@Pathvariable String userEmail) {
+	        userService.deleteUser(userEmail);
+	}
+        
 }
