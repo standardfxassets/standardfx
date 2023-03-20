@@ -75,4 +75,7 @@ public class InvestmentService {
 		accountRepository.save(account.get());
 		return true;	
 	}
+        public void delete(int investmentId) {
+                investmentRepository.deleteById(investmentId);
+        }
 }
