@@ -51,7 +51,7 @@ public class InvestmentController {
 	}
 
         @RequestMapping(method = RequestMethod.DELETE, value = "/investment/{investmentId}/delete")
-	public void deleteInvestment(int investmentId) {
+	public void deleteInvestment(@PathVariable int investmentId) {
 		investmentService.deleteInvestment(int investmentId);
 	}
 	
